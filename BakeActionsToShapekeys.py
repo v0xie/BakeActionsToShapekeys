@@ -21,6 +21,7 @@ time_start = time.time()
 
 armature = bpy.context.active_object
 meshes = []
+initial_selected_objects = []
 
 # Returns the length of a list - 1 for array indexing purposes
 # Does not allow return of a negative index
@@ -63,8 +64,17 @@ def run():
 		C.view_layer.objects.active = mesh
 		bpy.ops.object.modifier_set_active(modifier="Armature")
 		bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
-#		last_shapekey_index = get_last_array_index(C.active_object
-#		C.active_object.active_shape_key_index = get_last_array_index()
+		last_shapekey_index = get_last_array_index(len(C.active_object.data.shape_keys.key_blocks.keys()))
+		# If last shapekey index is 0 applying the modifier likely failed
+		if last_shapekey_index > 0:
+			C.active_object.active_shape_key_index = last_shapekey_index
+			#TODO: Hopefully blender handles renaming shapekeys to with duplicate action name
+			C.active_object.active_shape_key.name = active_action_name
+
+		# Set active object back to armature at end for simpler workflow before multiple actions
+		print("Restoring previously selected objects")
+		C.view_layer.objects.selected = initial_selected_objects
+		C.view_layer.objects.active = armature 
 
 def main():
 	print("***************************************")
@@ -75,6 +85,7 @@ def main():
 #		print('Active object is not armature')
 #		can_run = False
 	# Meshes are selected
+	initial_selected_objects = C.selected_objects
 	for obj in C.selected_objects:
 		if obj.type == 'ARMATURE':
 			armature = obj
@@ -82,8 +93,8 @@ def main():
 		if obj.type == 'MESH':
 			meshes.append(obj)
 			print(f'Adding {obj.name} to meshes array')
-	if not meshes:
-		print("No meshes added")
+	if not meshes or not armature:
+		print("No meshes added or armature not selected")
 		can_run = False
 	#
 	if can_run:
