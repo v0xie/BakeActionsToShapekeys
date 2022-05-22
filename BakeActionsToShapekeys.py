@@ -22,11 +22,22 @@ time_start = time.time()
 armature = bpy.context.active_object
 meshes = []
 
+# Returns the length of a list - 1 for array indexing purposes
+# Does not allow return of a negative index
+def get_last_array_index(list_len=0):
+	last_index = list_len - 1
+	return last_index if last_index > -1 else 0
+
 def run():
 	# TODO: Operate on copy of object
 	# TODO: Multiple actions
 	# TODO: Support bake by keyframe (bake selected keyframe only)
+
 #	actions = [armature.animation_data.action]
+
+	C.view_layer.objects.active = armature 
+	active_action_name = armature.animation_data.action.name
+	print(f"Baking {active_action_name} to shape key")
 
 	for mesh in meshes:
 		C.view_layer.objects.active = mesh
@@ -52,17 +63,22 @@ def run():
 		C.view_layer.objects.active = mesh
 		bpy.ops.object.modifier_set_active(modifier="Armature")
 		bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
+#		last_shapekey_index = get_last_array_index(C.active_object
+#		C.active_object.active_shape_key_index = get_last_array_index()
 
 def main():
 	print("***************************************")
 	print("BakeShapeKeysToActions")
 	can_run = True 
-	# Armature is active object
-	if armature == None or armature.type != 'ARMATURE':
-		print('Active object is not armature')
-		can_run = False
+#	# Armature is active object
+#	if armature == None or armature.type != 'ARMATURE':
+#		print('Active object is not armature')
+#		can_run = False
 	# Meshes are selected
 	for obj in C.selected_objects:
+		if obj.type == 'ARMATURE':
+			armature = obj
+			print(f'Setting {obj.name} as ')
 		if obj.type == 'MESH':
 			meshes.append(obj)
 			print(f'Adding {obj.name} to meshes array')
