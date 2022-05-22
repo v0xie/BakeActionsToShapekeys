@@ -58,6 +58,7 @@ def run():
 		C.active_object.active_shape_key_index = 0
 
 		# TODO: Re-set keyframe so the active frame is what is in the action
+		# TODO: Find armature modifier if it doesn't exist or is named differently than "Armature"
 		# Apply modifier as shapekey and rename as action name
 		# If duplicate name exists, hopefully blender handles that lmao
 		print("Applying Armature modifier as shape key")
