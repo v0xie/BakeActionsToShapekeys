@@ -13,34 +13,68 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
 import bpy
-from mathutils import *
 D = bpy.data
 C = bpy.context
+time_start = time.time()
 
 armature = bpy.context.active_object
 meshes = []
 
 def run():
-	print('run')
+	# TODO: Operate on copy of object
+	# TODO: Multiple actions
+	# TODO: Support bake by keyframe (bake selected keyframe only)
+#	actions = [armature.animation_data.action]
+
+	for mesh in meshes:
+		C.view_layer.objects.active = mesh
+
+		# Find armature mod
+		armature_modifier = [mod for mod in C.active_object.modifiers if mod.type == 'ARMATURE']
+		if armature_modifier:
+			bpy.ops.object.modifier_set_active(modifier="Armature")
+		else:
+			#TODO: Add armature modifier if missing
+			print(f"No armature modifier found, skipping {mesh.name}")
+
+		# Add basis shape key if missing
+		if C.active_object.active_shape_key == None:
+			print(f'Adding basis shapekey in {mesh.name}')
+			bpy.ops.object.shape_key_add(False)
+		C.active_object.active_shape_key_index = 0
+
+		# TODO: Re-set keyframe so the active frame is what is in the action
+		# Apply modifier as shapekey and rename as action name
+		# If duplicate name exists, hopefully blender handles that lmao
+		print("Applying Armature modifier as shape key")
+		C.view_layer.objects.active = mesh
+		bpy.ops.object.modifier_set_active(modifier="Armature")
+		bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
 
 def main():
+	print("***************************************")
+	print("BakeShapeKeysToActions")
 	can_run = True 
-
-	# Make sure we can run the script
+	# Armature is active object
 	if armature == None or armature.type != 'ARMATURE':
-		print('Select the armature first')
+		print('Active object is not armature')
 		can_run = False
+	# Meshes are selected
 	for obj in C.selected_objects:
 		if obj.type == 'MESH':
 			meshes.append(obj)
 			print(f'Adding {obj.name} to meshes array')
 	if not meshes:
 		print("No meshes added")
-
+		can_run = False
+	#
 	if can_run:
 		run()
 	else:
 		print('Aborting BakeActionsToShapekeys')
+	print("BakeShapeKeysToActions Finished: %.4f sec" % (time.time() - time_start))
+	print("***************************************")
 
 main()
