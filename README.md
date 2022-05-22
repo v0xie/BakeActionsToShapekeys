@@ -1,4 +1,4 @@
-##Bake Actions To Shapekeys
+## Bake Actions To Shapekeys
 Blender 3.1  
 * Select mesh objects and armature object last  
 * Meshes should have Armature modifier named "Armature" (without quotes)  
