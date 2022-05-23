@@ -19,14 +19,15 @@ D = bpy.data
 C = bpy.context
 time_start = time.time()
 
+# TODO: Launch options
+action_name_filter = "Exp"
+delete_old_duplicate_shapekeys = True
+
 # 
 armature = bpy.context.active_object
 meshes = []
 initial_selected_objects = []
-#
-action_name_filter = "Exp"
 actions_to_bake = []
-delete_old_duplicate_shapekeys = True
 
 # Returns the length of a list - 1 for array indexing purposes
 # Does not allow return of a negative index
@@ -47,6 +48,8 @@ def run():
 		actions_to_bake = [C.active_object.animation_data.action]
 	print(f"Actions to bake: {str(actions_to_bake)}")
 
+	##### OBJECT MODE
+	bpy.ops.object.mode_set(mode='OBJECT')
 	C.view_layer.objects.active = armature 
 
 	for mesh in meshes:
@@ -77,7 +80,17 @@ def run():
 			C.view_layer.objects.active = mesh
 			mesh_name = C.active_object.name
 
+			##### POSE MODE
+			# Reset pose then reset unkeyed
+			C.view_layer.objects.active = armature 
+			bpy.ops.object.mode_set(mode='POSE')
+			bpy.ops.pose.transforms_clear()
+			bpy.ops.pose.user_transforms_clear()
+			bpy.ops.object.mode_set(mode='OBJECT')
+			##### END POSE MODE
+
 			#Remove duplicate shapekey from mesh if enabled
+			C.view_layer.objects.active = mesh
 			if delete_old_duplicate_shapekeys:
 				if action_name in C.active_object.data.shape_keys.key_blocks.keys():
 					print(f"Removing old shape key: {action_name}")
@@ -92,6 +105,7 @@ def run():
 						print(f"TypeError: No active shape key")
 
 			# Commence bake
+			C.view_layer.objects.active = mesh
 			print(f"Baking {action_name} to shape key for mesh {C.view_layer.objects.active.name}")
 			bpy.ops.object.modifier_set_active(modifier="Armature")
 			bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
@@ -103,6 +117,8 @@ def run():
 				C.active_object.active_shape_key.name = action_name
 			else:
 				print("Shapekey bake failed")
+			# Reset shape key index
+			C.active_object.active_shape_key_index = 0
 
 def cleanup():
 		# Set active object back to armature at end for simpler workflow before multiple actions
