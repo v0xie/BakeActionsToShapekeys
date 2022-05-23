@@ -19,9 +19,13 @@ D = bpy.data
 C = bpy.context
 time_start = time.time()
 
+# 
 armature = bpy.context.active_object
 meshes = []
 initial_selected_objects = []
+#
+action_name_filter = "Exp"
+actions_to_bake = []
 
 # Returns the length of a list - 1 for array indexing purposes
 # Does not allow return of a negative index
@@ -34,11 +38,15 @@ def run():
 	# TODO: Multiple actions
 	# TODO: Support bake by keyframe (bake selected keyframe only)
 
-#	actions = [armature.animation_data.action]
+	# Filter actions by name TODO: or regex
+	# These are strings
+	if action_name_filter != "":
+		actions_to_bake = [action for action in bpy.data.actions.keys() if action_name_filter in action]
+	else:
+		actions_to_bake = [C.active_object.animation_data.action]
+	print(f"Actions to bake: {str(actions_to_bake)}")
 
 	C.view_layer.objects.active = armature 
-	active_action_name = armature.animation_data.action.name
-	print(f"Baking {active_action_name} to shape key")
 
 	for mesh in meshes:
 		C.view_layer.objects.active = mesh
@@ -61,16 +69,23 @@ def run():
 		# TODO: Find armature modifier if it doesn't exist or is named differently than "Armature"
 		# Apply modifier as shapekey and rename as action name
 		# If duplicate name exists, hopefully blender handles that lmao
-		print("Applying Armature modifier as shape key")
-		C.view_layer.objects.active = mesh
-		bpy.ops.object.modifier_set_active(modifier="Armature")
-		bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
-		last_shapekey_index = get_last_array_index(len(C.active_object.data.shape_keys.key_blocks.keys()))
-		# If last shapekey index is 0 applying the modifier likely failed
-		if last_shapekey_index > 0:
-			C.active_object.active_shape_key_index = last_shapekey_index
-			#TODO: Hopefully blender handles renaming shapekeys to with duplicate action name
-			C.active_object.active_shape_key.name = active_action_name
+		for action in actions_to_bake:
+			action_name = action
+			C.view_layer.objects.active = armature 
+			C.active_object.animation_data.action = bpy.data.actions.get(action_name)
+
+			C.view_layer.objects.active = mesh
+			print(f"Baking {action_name} to shape key for mesh {C.view_layer.objects.active.name}")
+			bpy.ops.object.modifier_set_active(modifier="Armature")
+			bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
+			last_shapekey_index = get_last_array_index(len(C.active_object.data.shape_keys.key_blocks.keys()))
+			# If last shapekey index is 0 applying the modifier likely failed
+			if last_shapekey_index > 0:
+				C.active_object.active_shape_key_index = last_shapekey_index
+				#TODO: Hopefully blender handles renaming shapekeys to with duplicate action name
+				C.active_object.active_shape_key.name = action_name
+			else:
+				print("Shapekey bake failed")
 
 		# Set active object back to armature at end for simpler workflow before multiple actions
 		print("Restoring previously selected objects")
@@ -90,7 +105,7 @@ def main():
 	for obj in C.selected_objects:
 		if obj.type == 'ARMATURE':
 			armature = obj
-			print(f'Setting {obj.name} as ')
+			print(f'Setting {obj.name} as armature object')
 		if obj.type == 'MESH':
 			meshes.append(obj)
 			print(f'Adding {obj.name} to meshes array')
