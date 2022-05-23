@@ -26,6 +26,7 @@ initial_selected_objects = []
 #
 action_name_filter = "Exp"
 actions_to_bake = []
+delete_old_duplicate_shapekeys = True
 
 # Returns the length of a list - 1 for array indexing purposes
 # Does not allow return of a negative index
@@ -73,8 +74,24 @@ def run():
 			action_name = action
 			C.view_layer.objects.active = armature 
 			C.active_object.animation_data.action = bpy.data.actions.get(action_name)
-
 			C.view_layer.objects.active = mesh
+			mesh_name = C.active_object.name
+
+			#Remove duplicate shapekey from mesh if enabled
+			if delete_old_duplicate_shapekeys:
+				if action_name in C.active_object.data.shape_keys.key_blocks.keys():
+					print(f"Removing old shape key: {action_name}")
+					C.active_object.active_shape_key_index = 0
+					try:
+						C.active_object.active_shape_key_index = C.active_object.data.shape_keys.key_blocks.keys().index(action_name)
+						if C.active_object.active_shape_key != None:
+							C.active_object.shape_key_remove(C.active_object.active_shape_key)
+					except ValueError:
+						print(f"ValueError: {action_name} not in shape key list")
+					except TypeError:
+						print(f"TypeError: No active shape key")
+
+			# Commence bake
 			print(f"Baking {action_name} to shape key for mesh {C.view_layer.objects.active.name}")
 			bpy.ops.object.modifier_set_active(modifier="Armature")
 			bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
@@ -87,6 +104,7 @@ def run():
 			else:
 				print("Shapekey bake failed")
 
+def cleanup():
 		# Set active object back to armature at end for simpler workflow before multiple actions
 		print("Restoring previously selected objects")
 		C.view_layer.objects.selected = initial_selected_objects
@@ -115,6 +133,7 @@ def main():
 	#
 	if can_run:
 		run()
+		cleanup()
 	else:
 		print('Aborting BakeActionsToShapekeys')
 	print("BakeShapeKeysToActions Finished: %.4f sec" % (time.time() - time_start))
