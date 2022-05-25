@@ -20,7 +20,7 @@ C = bpy.context
 time_start = time.time()
 
 # TODO: Launch options
-action_name_filter = "Exp"
+action_name_filter = "Exp,Vis"
 delete_old_duplicate_shapekeys = True
 
 # 
@@ -28,6 +28,16 @@ armature = bpy.context.active_object
 meshes = []
 initial_selected_objects = []
 actions_to_bake = []
+
+# Returns list of filters
+def filter_name_list(delimited_str="",delimiter=","):
+	if delimited_str == "":
+		return [""]
+	if delimiter not in delimited_str:
+		return [delimited_str]
+	filter_list = delimited_str.split(delimiter)
+	print(f"List of filters: {str(filter_list)}")
+	return filter_list
 
 # Returns the length of a list - 1 for array indexing purposes
 # Does not allow return of a negative index
@@ -43,7 +53,8 @@ def run():
 	# Filter actions by name TODO: or regex
 	# These are strings
 	if action_name_filter != "":
-		actions_to_bake = [action for action in bpy.data.actions.keys() if action_name_filter in action]
+#		actions_to_bake = [action for action in bpy.data.actions.keys() if action_name_filter in action]
+		actions_to_bake = [action for action in bpy.data.actions.keys() if action_name_filter in filter_name_list(action_name_filter, ",")]
 	else:
 		actions_to_bake = [C.active_object.animation_data.action]
 	print(f"Actions to bake: {str(actions_to_bake)}")
