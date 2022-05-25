@@ -20,7 +20,7 @@ C = bpy.context
 time_start = time.time()
 
 # TODO: Launch options
-action_name_filter = "Exp,Vis"
+action_name_filter = "Cheek_,Eye_,Eyes_,Jaw_,Exp.,Vis.,VRC,Mouth_,Tongue_"
 delete_old_duplicate_shapekeys = True
 
 # 
@@ -50,11 +50,14 @@ def run():
 	# TODO: Multiple actions
 	# TODO: Support bake by keyframe (bake selected keyframe only)
 
+	filters = filter_name_list(action_name_filter,",")
+	actions_to_bake = []
 	# Filter actions by name TODO: or regex
 	# These are strings
 	if action_name_filter != "":
 #		actions_to_bake = [action for action in bpy.data.actions.keys() if action_name_filter in action]
-		actions_to_bake = [action for action in bpy.data.actions.keys() if action_name_filter in filter_name_list(action_name_filter, ",")]
+#		actions_to_bake = [action for action in bpy.data.actions.keys() if filt in action]
+		actions_to_bake = [action for action in bpy.data.actions.keys() if any(filt in action for filt in filters)]
 	else:
 		actions_to_bake = [C.active_object.animation_data.action]
 	print(f"Actions to bake: {str(actions_to_bake)}")
