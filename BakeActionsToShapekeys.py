@@ -120,6 +120,7 @@ def run():
 
 			# Commence bake
 			C.view_layer.objects.active = mesh
+			C.active_object.show_only_shape_key = False
 			print(f"Baking {action_name} to shape key for mesh {C.view_layer.objects.active.name}")
 			bpy.ops.object.modifier_set_active(modifier="Armature")
 			bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
