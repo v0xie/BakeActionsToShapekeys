@@ -124,12 +124,21 @@ def run():
 			print(f"Baking {action_name} to shape key for mesh {C.view_layer.objects.active.name}")
 			bpy.ops.object.modifier_set_active(modifier="Armature")
 			bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="Armature", report=True)
+			C.active_object.show_only_shape_key = True
+			last_shapekey_index = get_last_array_index(len(C.active_object.data.shape_keys.key_blocks.keys()))
+			C.active_object.active_shape_key_index = last_shapekey_index
+			bpy.ops.object.modifier_set_active(modifier="CorrectiveSmooth")
+			bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=True, modifier="CorrectiveSmooth", report=True)
 			last_shapekey_index = get_last_array_index(len(C.active_object.data.shape_keys.key_blocks.keys()))
 			# If last shapekey index is 0 applying the modifier likely failed
 			if last_shapekey_index > 0:
 				C.active_object.active_shape_key_index = last_shapekey_index
 				#TODO: Hopefully blender handles renaming shapekeys to with duplicate action name
 				C.active_object.active_shape_key.name = action_name
+				if last_shapekey_index-1 > 0:
+					C.active_object.active_shape_key_index = last_shapekey_index-1
+					C.active_object.shape_key_remove(C.active_object.active_shape_key)
+
 			else:
 				print("Shapekey bake failed")
 			# Reset shape key index
