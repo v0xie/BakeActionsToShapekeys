@@ -23,13 +23,20 @@ https://user-images.githubusercontent.com/28695009/232027082-0bf80862-951f-4390-
 * Select your new shape key and rename to your action name
 * Repeat 200 times...
 
-# Gotchas
+## Gotchas
 * Make sure all the bones affected by your actions are on visible layers
 * You must have a Corrective Smooth modifier on all meshes (you can set the smoothing amount to 0.0 if you don't need it)
 * Make sure your timeline is on the keyframe you want to bake
 * You must be in Object mode when running the script
 
 ### Works with Blender 3.3.1
+
+### Links
+[https://voxie3d.com](https://voxie3d.com)  
+
+I make avatars for VRChat and ChilloutVR, sold on Gumroad and Booth:  
+[https://app.gumroad.com/voxieavatars](https://app.gumroad.com/voxieavatars)  
+[https://voxie.booth.pm](https://voxie.booth.pm)  
 
 ### License
 GPLv3
