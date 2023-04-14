@@ -4,6 +4,9 @@ A script to automate baking actions to shape keys with corrective smoothing. Int
 
 
 # Usage 
+
+https://github.com/v0xie/BakeActionsToShapekeys/raw/batch-actions/images/BakeActionsToShapekeys_Demo.mp4
+
 ## Instructions
 * Select mesh objects and armature object last  
 * Meshes should have Armature modifier named "Armature" (without quotes)  
